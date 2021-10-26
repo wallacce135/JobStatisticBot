@@ -4,49 +4,58 @@ import os
 import time
 
 
-with open('jobsList.json', 'r', encoding='utf-8') as f:
-    text = json.load(f)
-    # print(text)
+with open('jobsList.json', 'r', encoding='utf-8') as file:
+    listOfJobs = json.load(file)
 
-def getPage(jobName):
+
+def getData(vacancyName):
+
     params = {
-        'text': jobName,
+        'text': vacancyName,
         'area': 2,
-        'page': 1,
-        'per_page': 30
-        }
+        'page': 0,
+        'per_page': 5
+    }
 
     req = requests.get('https://api.hh.ru/vacancies', params)
     data = req.content.decode()
-    return data
+
+    # Запись полученного с API резльтата
+    with open('result.json', 'w', encoding='utf-8') as file:
+        file.write(data)
+
+    # Чтение названия из вакансий по профессии
+
+    with open('result.json', 'r', encoding='utf-8') as file:
+        data = json.load(file)
+        for i in range(0,100000000):
+            try:
+                print(data['items'][i]['name'])
+            except IndexError:
+                break
 
 
-def pageProccessing(jobName):
+# Открытие файла с профессиями для чтения
+with open('jobsList.json', 'r', encoding='utf-8') as file:
+    values = json.load(file)
+    jobList = values['jobList']
+    print(jobList)
 
-    for page in range(0, 1):
-        jsonObj = json.loads(getPage(jobName=jobName))
+# Вызов функции для каждой профессии
 
-        fileName = 'C:/Users/Pechka/Desktop/JobStatisticsBot/{}.json'.format(
-            len(os.listdir('C:/Users/Pechka/Desktop/JobStatisticsBot/pagination')))
-
-        f = open(fileName, mode='w', encoding='utf-8')
-        f.write(json.dumps(jsonObj, ensure_ascii=False))
-        f.close()
-
-        time.sleep(0.25)
-
-for i in text['jobList']:
-    pageProccessing(i)
+for vacancy in jobList:
+    getData(vacancy)
 
 
 
 
-# with open('0.json', 'r', encoding='utf-8') as f:
-#     allData = json.load(f)
-#     # print(allData)
-#     for i in range(0, 1000000):
+
+
+# with open('result.json', 'r', encoding='utf-8') as file:
+#     data = json.load(file)
+#     for i in range(0, 100000):
 #         try:
-#             name = allData['items'][i]['name']
+#             name = data['items'][i]['name']
 #             print(name)
 #         except IndexError:
 #             break
